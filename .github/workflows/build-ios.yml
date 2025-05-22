@@ -1,0 +1,50 @@
+name: iOS Simulator Build
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Installer SVN
+        run: |
+          brew install subversion
+
+      - name: Cloner le projet depuis SVN
+        run: |
+          echo "Téléchargement du code depuis SVN...."
+          svn checkout --username "${{ secrets.SVN_USERNAME }}" --password "${{ secrets.SVN_PASSWORD }}" https://svn.jiscomputing.com/mytransporteomobile/ project
+
+      - name: Installer Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.24.5
+          architecture: x64
+
+      - name: Installer les dépendances Flutter
+        run: |
+          cd project
+          flutter pub get
+
+      - name: Corriger la version minimale iOS
+        run: |
+          cd project/ios
+          sed -i '' 's/platform :ios, '9.0'/platform :ios, '12.0'/' Podfile
+          pod install --repo-update
+
+      - name: Compiler l’application iOS pour simulateur
+        run: |
+          cd project
+          flutter build ios --simulator
+
+      - name: Sauvegarder l’application en artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator-build
+          path: project/build/ios/iphonesimulator
+          compression-level: 0
