@@ -42,7 +42,7 @@ jobs:
             sed -i '' '/target.*RunnerTests/,/end/ s/^/#/' Podfile
           fi
           
-          # Exécuter pod install avec l'option --no-integrate pour éviter les problèmes avec RunnerTests
+          # Exécuter pod install avec l'option --no-integrate pour éviter les problèmes avec RunnerTests modifier
           pod install --repo-update --no-integrate || pod install --repo-update
 
       - name: Compiler l’application iOS pour simulateur
